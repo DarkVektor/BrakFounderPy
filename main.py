@@ -5,7 +5,6 @@ from tkinter import ttk
 from tkinter.filedialog import askdirectory
 
 '''
-Окно с текстом отчета
 Полоса прокрутки текста'''
 
 #Нажатие на кнопку открытия директории с заданиями и отчетами линии M
@@ -338,12 +337,36 @@ def saveM():
     answerFile = open(pathM + "/Общий отчет.txt", "w")
     answerFile.write(TextReportM)
     answerFile.close()
+    #Отрисовка текстового поля Отчёта
+    subWindow = Toplevel(window)
+    subWindow.title("Текст общего отчета")
+    subWindow.geometry('668x392+600+120')
+    subWindow.wm_maxsize(width=668, height=392)
+    subWindow.wm_minsize(width=668, height=392)
+    TextReportFrame = Text(subWindow)
+    TextReportFrame.grid(row=0, column=0, padx=2, pady=2)
+    scrollbarReport = Scrollbar(subWindow, command=TextReportFrame.yview)
+    scrollbarReport.grid(row=0, column=1, sticky='nsew')
+    TextReportFrame['yscrollcommand'] = scrollbarReport.set
+    TextReportFrame.insert(END, TextReportM)
 
 #Сохранение общего текста отчёта линии S
 def saveS():
     answerFile = open(pathS + "/Общий отчет.txt", "w")
     answerFile.write(TextReportS)
     answerFile.close()
+    # Отрисовка текстового поля Отчёта
+    subWindow = Toplevel(window)
+    subWindow.title("Текст общего отчета")
+    subWindow.geometry('668x392+600+120')
+    subWindow.wm_maxsize(width=668, height=392)
+    subWindow.wm_minsize(width=668, height=392)
+    TextReportFrame = Text(subWindow)
+    TextReportFrame.grid(row=0, column=0, padx=2, pady=2)
+    scrollbarReport = Scrollbar(subWindow, command=TextReportFrame.yview)
+    scrollbarReport.grid(row=0, column=1, sticky='nsew')
+    TextReportFrame['yscrollcommand'] = scrollbarReport.set
+    TextReportFrame.insert(END, TextReportS)
 
 pathS = ""
 listTasksS = list()
