@@ -8,6 +8,7 @@ from tkinter.filedialog import askdirectory
 def open_file_M():
     btn_exe_M["state"] = "normal"
     btn_save_M["state"] = "disabled"
+    txt_edit_M['state'] = "normal"
     global pathM
     global listTasksM
     global listSerReportsM
@@ -23,6 +24,7 @@ def open_file_M():
     if filepath == "":
         txt_edit_M.insert(END, "Неверно выбрана директория\n")
         btn_exe_M["state"] = "disabled"
+        txt_edit_M['state'] = "disabled"
         return
     l = os.listdir(filepath)
     #Запись файлов Заданий и Отчета Сериализации
@@ -41,12 +43,14 @@ def open_file_M():
         txt_edit_M.insert(END, f"{e}\n")
         listTasksM.clear()
         listSerReportsM.clear()
+        txt_edit_M['state'] = "disabled"
         return
     if 'Агрегация' not in l:
         listTasksM.clear()
         listSerReportsM.clear()
         txt_edit_M.insert(END, "В данной директории нет папки 'Агрегация'\n")
         btn_exe_M["state"] = "disabled"
+        txt_edit_M['state'] = "disabled"
         return
     # Запись файлов Отчетов Агрегации
     l = os.listdir(filepath + '/Агрегация')
@@ -62,6 +66,7 @@ def open_file_M():
         listTasksM.clear()
         listSerReportsM.clear()
         listReportsM.clear()
+        txt_edit_M['state'] = "disabled"
         return
 
     if len(listTasksM) == 0:
@@ -70,6 +75,7 @@ def open_file_M():
         listTasksM.clear()
         listSerReportsM.clear()
         listReportsM.clear()
+        txt_edit_M['state'] = "disabled"
         return
     else:
         txt_edit_M.insert(END, f"Количество заданий: {len(listTasksM)}\n")
@@ -81,6 +87,7 @@ def open_file_M():
         listTasksM.clear()
         listSerReportsM.clear()
         listReportsM.clear()
+        txt_edit_M['state'] = "disabled"
         return
     else:
         txt_edit_M.insert(END, f"Количество отчётов сериализаций: {len(listSerReportsM)}\n")
@@ -92,15 +99,18 @@ def open_file_M():
         listTasksM.clear()
         listSerReportsM.clear()
         listReportsM.clear()
+        txt_edit_M['state'] = "disabled"
         return
     else:
         txt_edit_M.insert(END, f"Количество отчётов агрегаций: {len(listReportsM)}\n")
         for report in listReportsM:
             txt_edit_M.insert(END, f"{report['id']}\n")
+    txt_edit_M['state'] = "disabled"
     pathM = filepath
 
 #Нажатие на кнопку открытия директории с заданиями и отчетами линии S
 def open_file_S():
+    txt_edit_S['state'] = "normal"
     btn_exe_S["state"] = "normal"
     btn_save_S["state"] = "disabled"
     global pathS
@@ -116,6 +126,7 @@ def open_file_S():
     if filepath == "":
         txt_edit_S.insert(END, "Неверно выбрана директория\n")
         btn_exe_S["state"] = "disabled"
+        txt_edit_S['state'] = "disabled"
         return
     # Запись файлов Заданий и Отчетов
     l = os.listdir(filepath)
@@ -134,12 +145,14 @@ def open_file_S():
         txt_edit_S.insert(END, f"{e}\n")
         listTasksS.clear()
         listReportsS.clear()
+        txt_edit_S['state'] = "disabled"
         return
     if len(listTasksS) == 0:
         txt_edit_S.insert(END, "Текст заданий не найден, введите другую директорию\n")
         btn_exe_S["state"] = "disabled"
         listTasksS.clear()
         listReportsS.clear()
+        txt_edit_S['state'] = "disabled"
         return
     else:
         txt_edit_S.insert(END, f"Количество заданий: {len(listTasksS)}\n")
@@ -150,15 +163,18 @@ def open_file_S():
         btn_exe_S["state"] = "disabled"
         listTasksS.clear()
         listReportsS.clear()
+        txt_edit_S['state'] = "disabled"
         return
     else:
         txt_edit_S.insert(END, f"Количество отчётов: {len(listReportsS)}\n")
         for report in listReportsS:
             txt_edit_S.insert(END, f"{report['id']}\n")
+    txt_edit_S['state'] = "disabled"
     pathS = filepath
 
 #Выполняет поиск ошибок
 def executeM():
+    txt_edit_M['state'] = "normal"
     global TextReportM
     TextReportM = ""
     btn_save_M["state"] = "normal"
@@ -197,24 +213,31 @@ def executeM():
         if dublesTasks == "" and dublesPacks == "" and otherErrors == "" and dublesBoxs == "":
             txt_edit_M.insert(END, f"\nСерия обработана без ошибок.\nВсего в серии: {len(dictReportsPacks)}\nБрака: {len(dictTaskPacksM) - len(dictReportsPacks)}")
             TextReportM = CreateMainReportM(dictTaskPacksM)
+            txt_edit_M['state'] = "disabled"
         if dublesTasks != "":
             txt_edit_M.insert(END, "Дубли пачек в задании:\n" + dublesTasks)
             btn_save_M["state"] = "disabled"
+            txt_edit_M['state'] = "disabled"
         if dublesBoxs != "":
             txt_edit_M.insert(END, "Дубли коробов в задании:\n" + dublesBoxs)
             btn_save_M["state"] = "disabled"
+            txt_edit_M['state'] = "disabled"
         if dublesPacks != "":
             txt_edit_M.insert(END, "Дубли пачек:\n" + dublesPacks)
             btn_save_M["state"] = "disabled"
+            txt_edit_M['state'] = "disabled"
         if otherErrors != "":
             txt_edit_M.insert(END, "Прочие ошибки:\n" + otherErrors)
             btn_save_M["state"] = "disabled"
+            txt_edit_M['state'] = "disabled"
     else:
         txt_edit_M.insert(END, "Не хватает текста какого/их-то отчёта/ов...")
         btn_save_M["state"] = "disabled"
+        txt_edit_M['state'] = "disabled"
 
 #Выполняет поиск ошибок
 def executeS():
+    txt_edit_S['state'] = "normal"
     global TextReportS
     TextReportS = ""
     btn_save_S["state"] = "normal"
@@ -269,19 +292,24 @@ def executeS():
         if dublesTasks != "":
             txt_edit_S.insert(END, "Дубли пачек в задании:\n" + dublesTasks)
             btn_save_S["state"] = "disabled"
+            txt_edit_S['state'] = "disabled"
         if dublesBoxs != "":
             txt_edit_S.insert(END, "Дубли коробов в задании:\n" + dublesBoxs)
             btn_save_S["state"] = "disabled"
+            txt_edit_S['state'] = "disabled"
         if dublesPacks != "":
             txt_edit_S.insert(END, "Дубли пачек:\n" + dublesPacks)
             btn_save_S["state"] = "disabled"
+            txt_edit_S['state'] = "disabled"
         if otherErrors != "":
             txt_edit_S.insert(END, "Прочие ошибки:\n" + otherErrors)
             btn_save_S["state"] = "disabled"
+            txt_edit_S['state'] = "disabled"
 
     else:
         txt_edit_S.insert(END, "Не хватает текста какого/их-то отчёта/ов...")
         btn_save_S["state"] = "disabled"
+        txt_edit_S['state'] = "disabled"
 
 #Создание главного отчета Сериализации Линии M
 def CreateMainReportM(dtpM):
@@ -331,9 +359,12 @@ def CreateMainReportS(dtpS):
 
 #Сохранение общего текста отчёта линии M
 def saveM():
+    txt_edit_M['state'] = "normal"
     answerFile = open(pathM + "/Общий отчет.txt", "w")
     answerFile.write(TextReportM)
     answerFile.close()
+    txt_edit_M.insert(END, f"\nОбщий отчёт сохранён: {pathM}")
+    txt_edit_M['state'] = "disable"
     #Отрисовка текстового поля Отчёта
     subWindow = Toplevel(window)
     subWindow.title("Текст общего отчета")
@@ -349,9 +380,12 @@ def saveM():
 
 #Сохранение общего текста отчёта линии S
 def saveS():
+    txt_edit_S['state'] = "normal"
     answerFile = open(pathS + "/Общий отчет.txt", "w")
     answerFile.write(TextReportS)
     answerFile.close()
+    txt_edit_S.insert(END, f"\nОбщий отчёт сохранён: {pathS}")
+    txt_edit_S['state'] = "disabled"
     # Отрисовка текстового поля Отчёта
     subWindow = Toplevel(window)
     subWindow.title("Текст общего отчета")
