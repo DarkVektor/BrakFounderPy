@@ -4,9 +4,6 @@ from tkinter import *
 from tkinter import ttk
 from tkinter.filedialog import askdirectory
 
-'''
-Полоса прокрутки текста'''
-
 #Нажатие на кнопку открытия директории с заданиями и отчетами линии M
 def open_file_M():
     btn_exe_M["state"] = "normal"
@@ -388,8 +385,8 @@ tab_control.add(tabM, text='Линия M')
 tab_control.add(tabS, text='Линия S')
 tab_control.pack(expand=1, fill='both')
 # Вкладка линии M
-tabM.rowconfigure(0, minsize=800, weight=1)
-tabM.columnconfigure(1, minsize=800, weight=1)
+tabM.rowconfigure(0, minsize=10, weight=1)
+tabM.columnconfigure(1, minsize=10, weight=1)
 txt_edit_M = Text(tabM)
 fr_buttons_M = Frame(tabM)
 btn_open_M = Button(fr_buttons_M, text="Открыть", command=open_file_M)
@@ -400,11 +397,14 @@ btn_exe_M.grid(row=1, column=0, sticky="ew", padx=5)
 btn_save_M.grid(row=2, column=0, sticky="ew", padx=5, pady=2)
 fr_buttons_M.grid(row=0, column=0, sticky="ns")
 txt_edit_M.grid(row=0, column=1, sticky="nsew")
+scrollReportM = Scrollbar(tabM, command=txt_edit_M.yview)
+scrollReportM.grid(row=0, column=2, sticky='nsew')
+txt_edit_M['yscrollcommand'] = scrollReportM.set
 btn_exe_M["state"] = "disabled"
 btn_save_M["state"] = "disabled"
 # Вкладка Линии S
-tabS.rowconfigure(0, minsize=800, weight=1)
-tabS.columnconfigure(1, minsize=800, weight=1)
+tabS.rowconfigure(0, minsize=10, weight=1)
+tabS.columnconfigure(1, minsize=10, weight=1)
 txt_edit_S = Text(tabS)
 fr_buttons_S = Frame(tabS)
 btn_open_S = Button(fr_buttons_S, text="Открыть", command=open_file_S)
@@ -415,6 +415,9 @@ btn_exe_S.grid(row=1, column=0, sticky="ew", padx=5)
 btn_save_S.grid(row=2, column=0, sticky="ew", padx=5, pady=2)
 fr_buttons_S.grid(row=0, column=0, sticky="ns")
 txt_edit_S.grid(row=0, column=1, sticky="nsew")
+scrollReportS = Scrollbar(tabS, command=txt_edit_S.yview)
+scrollReportS.grid(row=0, column=2, sticky='nsew')
+txt_edit_S['yscrollcommand'] = scrollReportS.set
 btn_exe_S["state"] = "disabled"
 btn_save_S["state"] = "disabled"
 
