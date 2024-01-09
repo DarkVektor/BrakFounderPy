@@ -4,10 +4,9 @@ from tkinter import *
 from tkinter import ttk
 from tkinter.filedialog import askdirectory
 
-'''Поиск дублей линии С
-Сохранение отчетов линий М и С
-Полоса прокрутки текста
-Установка разрешения изначально и расположения'''
+'''
+Окно с текстом отчета
+Полоса прокрутки текста'''
 
 #Нажатие на кнопку открытия директории с заданиями и отчетами линии M
 def open_file_M():
@@ -164,37 +163,49 @@ def open_file_S():
 
 #Выполняет поиск ошибок
 def executeM():
+    global TextReportM
+    TextReportM = ""
     btn_save_M["state"] = "normal"
     btn_exe_M["state"] = "disable"
     if (len(listTasksM) and len(listSerReportsM) and len(listReportsM)) != 0:
         #Создание словаря и проверка пачек на дубли из задания Сериализации
-        dictTaskPacks = dict()
+        dictTaskPacksM = dict()
         dublesTasks = ""
         for task in listTasksM:
             for packs in task["productNumbers"]:
-                if dictTaskPacks.get(packs["Number"], None):
+                if dictTaskPacksM.get(packs["Number"], None):
                     dublesTasks += f"{packs['Number']} в задании уже есть\n"
                 else:
-                    dictTaskPacks[packs["Number"]] = 1
+                    dictTaskPacksM[packs["Number"]] = 1
         #Проверка пачек на дубли и принадлежность их заданию
         dictReportsPacks = dict()
+        dictBoxs = dict()
         dublesPacks = ""
+        dublesBoxs = ""
         otherErrors = ""
         for report in listReportsM:
             for box in report["readyBox"]:
-                for pack in box["productNumbers"]:
-                    if dictTaskPacks.get(pack, None):
-                        if dictReportsPacks.get(pack, None):
-                            dublesPacks += f"{pack} в коробах {dictReportsPacks[pack]} и {box['boxNumber']}\n"
+                if dictBoxs.get(box['boxNumber'], None):
+                    dublesBoxs += f"{box['boxNumber']} уже есть в {report['id']}/{box['Number']} и в {dictBoxs[box['boxNumber']]}"
+                else:
+                    dictBoxs[box['boxNumber']] = f"{report['id']}/{box['Number']}"
+                    for pack in box["productNumbers"]:
+                        if dictTaskPacksM.get(pack, None):
+                            if dictReportsPacks.get(pack, None):
+                                dublesPacks += f"{pack} в коробах {dictReportsPacks[pack]} и {box['boxNumber']}\n"
+                            else:
+                                dictReportsPacks[pack] = box["boxNumber"]
                         else:
-                            dictReportsPacks[pack] = box["boxNumber"]
-                    else:
-                        otherErrors += f"{pack} в коробе {box['boxNumber']} отсутствует в тексте задания\n"
+                            otherErrors += f"{pack} в коробе {box['boxNumber']} отсутствует в тексте задания\n"
         #Вывод текста ошибок
-        if dublesTasks == "" and dublesPacks == "" and otherErrors == "":
-            txt_edit_M.insert(END, f"\nСерия обработана без ошибок.\nВсего в серии: {len(dictReportsPacks)}\nБрака: {len(dictTaskPacks) - len(dictReportsPacks)}")
+        if dublesTasks == "" and dublesPacks == "" and otherErrors == "" and dublesBoxs == "":
+            txt_edit_M.insert(END, f"\nСерия обработана без ошибок.\nВсего в серии: {len(dictReportsPacks)}\nБрака: {len(dictTaskPacksM) - len(dictReportsPacks)}")
+            TextReportM = CreateMainReportM(dictTaskPacksM)
         if dublesTasks != "":
             txt_edit_M.insert(END, "Дубли пачек в задании:\n" + dublesTasks)
+            btn_save_M["state"] = "disabled"
+        if dublesBoxs != "":
+            txt_edit_M.insert(END, "Дубли коробов в задании:\n" + dublesBoxs)
             btn_save_M["state"] = "disabled"
         if dublesPacks != "":
             txt_edit_M.insert(END, "Дубли пачек:\n" + dublesPacks)
@@ -208,28 +219,144 @@ def executeM():
 
 #Выполняет поиск ошибок
 def executeS():
+    global TextReportS
+    TextReportS = ""
     btn_save_S["state"] = "normal"
-    return
+    btn_exe_S["state"] = "disable"
+    if (len(listTasksS) and len(listReportsS)) != 0:
+        # Создание словаря и проверка пачек на дубли из задания Сериализации
+        dictTaskPacksS = dict()
+        dublesTasks = ""
+        for task in listTasksS:
+            for packs in task["productNumbers"]:
+                pack = packs[4:17]
+                if dictTaskPacksS.get(pack, None):
+                    dublesTasks += f"{pack} в задании уже есть\n"
+                else:
+                    dictTaskPacksS[pack] = 1
+        #Проверка пачек на дубли и принадлежность их заданию
+        dictReportsPacks = dict()
+        dictBoxs = dict()
+        dublesPacks = ""
+        dublesBoxs = ""
+        otherErrors = ""
+        countSample = 0
+        for report in listReportsS:
+            #Агрегация
+            for box in report['readyBox']:
+                if dictBoxs.get(box['boxNumber'], None):
+                    dublesBoxs += f"{box['boxNumber']} - такой короб уже есть в {report['id']} и {dictBoxs[box['boxNumber']]}\n"
+                else:
+                    dictBoxs[box['boxNumber']] = report['id']
+                    for pack in box['contentNumbers']:
+                        if dictTaskPacksS.get(pack, None):
+                            if dictReportsPacks.get(pack, None):
+                                dublesPacks += f"{pack} в коробах {dictReportsPacks[pack]} и {box['boxNumber']}\n"
+                            else:
+                                dictReportsPacks[pack] = box['boxNumber']
+                        else:
+                            otherErrors += f"{pack} в коробе {box['boxNumber']} отсутствует в тексте задания\n"
+            #Отбор
+            for pack in report['sampleNumbers']:
+                countSample += 1
+                if dictTaskPacksS.get(pack['number'], None):
+                    if dictReportsPacks.get(pack['number'], None):
+                        dublesPacks += f"{pack['number']} в {dictReportsPacks[pack['number']]} и отборе\n"
+                    else:
+                        dictReportsPacks[pack['number']] = 'отборе'
+        #Вывод текста ошибок
+        if dublesTasks == "" and dublesPacks == "" and otherErrors == "" and dublesBoxs == "":
+            txt_edit_S.insert(END, f"\nСерия обработана без ошибок.\nВсего в серии: {len(dictReportsPacks) - countSample}\n"
+                                   f"Отбор: {countSample}\n"
+                                   f"Брака: {len(dictTaskPacksS) - len(dictReportsPacks)}")
+            TextReportS = CreateMainReportS(dictTaskPacksS)
+        if dublesTasks != "":
+            txt_edit_S.insert(END, "Дубли пачек в задании:\n" + dublesTasks)
+            btn_save_S["state"] = "disabled"
+        if dublesBoxs != "":
+            txt_edit_S.insert(END, "Дубли коробов в задании:\n" + dublesBoxs)
+            btn_save_S["state"] = "disabled"
+        if dublesPacks != "":
+            txt_edit_S.insert(END, "Дубли пачек:\n" + dublesPacks)
+            btn_save_S["state"] = "disabled"
+        if otherErrors != "":
+            txt_edit_S.insert(END, "Прочие ошибки:\n" + otherErrors)
+            btn_save_S["state"] = "disabled"
 
+    else:
+        txt_edit_S.insert(END, "Не хватает текста какого/их-то отчёта/ов...")
+        btn_save_S["state"] = "disabled"
+
+#Создание главного отчета Сериализации Линии M
+def CreateMainReportM(dtpM):
+    answerM = dict()
+    answerM['id'] = listSerReportsM[0]['id']
+    answerM['startTime'] = listSerReportsM[0]['startTime']
+    answerM['endTime'] = listSerReportsM[0]['endTime']
+    answerM['sampleNumbers'] = listSerReportsM[0]['sampleNumbers']
+    answerM['operators'] = listSerReportsM[0]['operators']
+    answerM['readyBox'] = listSerReportsM[0]['readyBox']
+    answerM['defectiveCodes'] = list()
+    answerM['emptyNumbers'] = list()
+    for report in listReportsM:
+        for box in report["readyBox"]:
+            for pack in box["productNumbers"]:
+                if dtpM[pack] == 1:
+                    answerM['emptyNumbers'].append(pack)
+                    del dtpM[pack]
+    for pack in dtpM:
+        answerM['defectiveCodes'].append({"number": pack, "defectCode" : "1"})
+    return json.dumps(answerM, indent=4, ensure_ascii=False)
+
+#Создание главного отчета Сериализации/Агрегации Линии S
+def CreateMainReportS(dtpS):
+    answerS = dict()
+    answerS['id'] = listReportsS[0]['id']
+    answerS['startTime'] = listReportsS[0]['startTime']
+    answerS['endTime'] = listReportsS[0]['endTime']
+    answerS['serializedOnly'] = list()
+    answerS['readyBox'] = list()                #Из-за нескольких отчетов нужно объединить короба
+    answerS['defectiveCodes'] = list()
+    answerS['sampleNumbers'] = list()           #Из-за нескольких отчетов нужно объединить отборы
+    answerS['emptyNumbers'] = list()
+    for report in listReportsS:
+        for box in report['readyBox']:
+            answerS['readyBox'].append(box)
+            for pack in box['contentNumbers']:
+                if dtpS.get(pack, None):
+                    del dtpS[pack]
+        for pack in report['sampleNumbers']:
+            answerS['sampleNumbers'].append(pack)
+            if dtpS.get(pack['number'], None):
+                del dtpS[pack['number']]
+    for pack in dtpS:
+        answerS['defectiveCodes'].append({"number": pack, "defectCode": "1"})
+    return json.dumps(answerS, indent=4, ensure_ascii=False)
+
+#Сохранение общего текста отчёта линии M
 def saveM():
-    print(listTasksM)
-    print(listSerReportsM)
-    print(listReportsM)
+    answerFile = open(pathM + "/Общий отчет.txt", "w")
+    answerFile.write(TextReportM)
+    answerFile.close()
 
+#Сохранение общего текста отчёта линии S
 def saveS():
-    print(listTasksS)
-    print(listReportsS)
+    answerFile = open(pathS + "/Общий отчет.txt", "w")
+    answerFile.write(TextReportS)
+    answerFile.close()
 
-pathM = ""
 pathS = ""
 listTasksS = list()
 listReportsS = list()
+TextReportS = ""
+pathM = ""
 listTasksM = list()
 listSerReportsM = list()
 listReportsM = list()
+TextReportM = ""
 window = Tk()
 window.title("BrakFounderPy")
-window.geometry('400x250')
+window.geometry('1100x400+100+100')
 window.minsize(width=400, height=250)
 tab_control = ttk.Notebook(window)
 tabM = ttk.Frame(tab_control)
